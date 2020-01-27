@@ -324,8 +324,31 @@ unsafe fn find_eh_action(
     eh::find_eh_action(lsda, &eh_context, foreign_exception)
 }
 
-// See docs in the `unwind` module.
+// See docs in the `unwind` module. This needs to be implemented in assembly
+// because _Unwind_Resume expects to be called directly from the landing pad.
+// This means that we need to force a tail call here.
 #[cfg(all(
+    not(bootstrap),
+    target_os = "windows",
+    any(target_arch = "x86", target_arch = "x86_64"),
+    target_env = "gnu"
+))]
+global_asm! {
+    r#"
+    .def _rust_eh_unwind_resume;
+    .scl 2;
+    .type 32;
+    .endef
+    .globl _rust_eh_unwind_resume
+    .p2align 4, 0x90
+_rust_eh_unwind_resume:
+    .cfi_startproc
+    jmp __Unwind_Resume
+    .cfi_endproc
+    "#
+}
+#[cfg(all(
+    bootstrap,
     target_os = "windows",
     any(target_arch = "x86", target_arch = "x86_64"),
     target_env = "gnu"
@@ -335,6 +358,7 @@ unsafe fn find_eh_action(
 unsafe extern "C" fn rust_eh_unwind_resume(panic_ctx: *mut u8) -> ! {
     uw::_Unwind_Resume(panic_ctx as *mut uw::_Unwind_Exception);
 }
+
 
 // Frame unwind info registration
 //
