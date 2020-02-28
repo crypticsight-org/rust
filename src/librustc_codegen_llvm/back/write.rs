@@ -178,6 +178,7 @@ pub fn target_machine_factory(
     let is_pie_binary = !find_features && is_pie_binary(sess);
     let trap_unreachable = sess.target.target.options.trap_unreachable;
     let emit_stack_size_section = sess.opts.debugging_opts.emit_stack_sizes;
+    let custom_unwind_resume = sess.target.target.options.custom_unwind_resume;
 
     let asm_comments = sess.asm_comments();
     let relax_elf_relocations = sess.target.target.options.relax_elf_relocations;
@@ -200,6 +201,7 @@ pub fn target_machine_factory(
                 asm_comments,
                 emit_stack_size_section,
                 relax_elf_relocations,
+                custom_unwind_resume,
             )
         };
 
