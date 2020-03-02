@@ -311,7 +311,14 @@ pub unsafe fn panic(data: Box<dyn Any + Send>) -> u32 {
     _CxxThrowException(throw_ptr, &mut THROW_INFO as *mut _ as *mut _);
 }
 
-pub unsafe fn cleanup(payload: [u64; 2]) -> Box<dyn Any + Send> {
+pub unsafe fn cleanup(payload: *mut u8) -> Box<dyn Any + Send> {
+    let payload = *&mut (payload as *mut [u64; 2]);
+
+    // Clear the first word of the exception so avoid double-dropping it.
+    // This will be read by the destructor which is implicitly called at the
+    // end of the catch block by the runtime.
+    payload[0] = 0;
+
     mem::transmute(raw::TraitObject { data: payload[0] as *mut _, vtable: payload[1] as *mut _ })
 }
 
