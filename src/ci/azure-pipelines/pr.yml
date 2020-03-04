@@ -22,3 +22,54 @@ jobs:
       mingw-check: {}
       x86_64-gnu-tools:
         CI_ONLY_WHEN_SUBMODULES_CHANGED: 1
+- job: Windows
+  timeoutInMinutes: 600
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - template: steps/run.yml
+  strategy:
+    matrix:
+      x86_64-msvc-1:
+        RUST_CONFIGURE_ARGS: --build=x86_64-pc-windows-msvc --enable-profiler
+        SCRIPT: make ci-subset-1
+        # FIXME(#59637)
+        NO_DEBUG_ASSERTIONS: 1
+        NO_LLVM_ASSERTIONS: 1
+      x86_64-msvc-2:
+        RUST_CONFIGURE_ARGS: --build=x86_64-pc-windows-msvc --enable-profiler
+        SCRIPT: make ci-subset-2
+      i686-msvc-1:
+        RUST_CONFIGURE_ARGS: --build=i686-pc-windows-msvc
+        SCRIPT: make ci-subset-1
+        # FIXME(#59637)
+        NO_DEBUG_ASSERTIONS: 1
+        NO_LLVM_ASSERTIONS: 1
+      i686-msvc-2:
+        RUST_CONFIGURE_ARGS: --build=i686-pc-windows-msvc
+        SCRIPT: make ci-subset-2
+        # FIXME(#59637)
+        NO_DEBUG_ASSERTIONS: 1
+        NO_LLVM_ASSERTIONS: 1
+      i686-mingw-1:
+        RUST_CONFIGURE_ARGS: --build=i686-pc-windows-gnu
+        SCRIPT: make ci-mingw-subset-1
+        CUSTOM_MINGW: 1
+        # FIXME(#59637)
+        NO_DEBUG_ASSERTIONS: 1
+        NO_LLVM_ASSERTIONS: 1
+      i686-mingw-2:
+        RUST_CONFIGURE_ARGS: --build=i686-pc-windows-gnu
+        SCRIPT: make ci-mingw-subset-2
+        CUSTOM_MINGW: 1
+      x86_64-mingw-1:
+        SCRIPT: make ci-mingw-subset-1
+        RUST_CONFIGURE_ARGS: --build=x86_64-pc-windows-gnu
+        CUSTOM_MINGW: 1
+        # FIXME(#59637)
+        NO_DEBUG_ASSERTIONS: 1
+        NO_LLVM_ASSERTIONS: 1
+      x86_64-mingw-2:
+        SCRIPT: make ci-mingw-subset-2
+        RUST_CONFIGURE_ARGS: --build=x86_64-pc-windows-gnu
+        CUSTOM_MINGW: 1

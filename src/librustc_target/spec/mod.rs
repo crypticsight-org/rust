@@ -579,6 +579,12 @@ pub struct TargetOptions {
     /// user-defined but before post_link_objects. Standard platform
     /// libraries that should be always be linked to, usually go here.
     pub late_link_args: LinkArgs,
+    /// Linker arguments used in addition to `late_link_args` if at least one
+    /// Rust dependency is dynamically linked.
+    pub late_link_args_dynamic: LinkArgs,
+    /// Linker arguments used in addition to `late_link_args` if aall Rust
+    /// dependencies are statically linked.
+    pub late_link_args_static: LinkArgs,
     /// Objects to link after all others, always found within the
     /// sysroot folder.
     pub post_link_objects: Vec<String>, // ... unconditionally
@@ -695,7 +701,7 @@ pub struct TargetOptions {
     /// Whether the target uses a custom unwind resumption routine.
     /// By default LLVM lowers `resume` instructions into calls to `_Unwind_Resume`
     /// defined in libgcc. If this option is enabled, the target must provide
-    /// `eh_unwind_resume` lang item.
+    /// a `rust_eh_unwind_resume` symbol.
     pub custom_unwind_resume: bool,
     /// Whether the runtime startup code requires the `main` function be passed
     /// `argc` and `argv` values.
@@ -863,6 +869,8 @@ impl Default for TargetOptions {
             post_link_objects: Vec::new(),
             post_link_objects_crt: Vec::new(),
             late_link_args: LinkArgs::new(),
+            late_link_args_dynamic: LinkArgs::new(),
+            late_link_args_static: LinkArgs::new(),
             link_env: Vec::new(),
             link_env_remove: Vec::new(),
             archive_format: "gnu".to_string(),
@@ -1142,6 +1150,8 @@ impl Target {
         key!(pre_link_objects_exe_crt, list);
         key!(pre_link_objects_dll, list);
         key!(late_link_args, link_args);
+        key!(late_link_args_dynamic, link_args);
+        key!(late_link_args_static, link_args);
         key!(post_link_objects, list);
         key!(post_link_objects_crt, list);
         key!(post_link_args, link_args);
@@ -1370,6 +1380,8 @@ impl ToJson for Target {
         target_option_val!(pre_link_objects_exe_crt);
         target_option_val!(pre_link_objects_dll);
         target_option_val!(link_args - late_link_args);
+        target_option_val!(link_args - late_link_args_dynamic);
+        target_option_val!(link_args - late_link_args_static);
         target_option_val!(post_link_objects);
         target_option_val!(post_link_objects_crt);
         target_option_val!(link_args - post_link_args);

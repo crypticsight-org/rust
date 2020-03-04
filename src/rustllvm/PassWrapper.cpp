@@ -452,7 +452,8 @@ extern "C" LLVMTargetMachineRef LLVMRustCreateTargetMachine(
     bool Singlethread,
     bool AsmComments,
     bool EmitStackSizeSection,
-    bool RelaxELFRelocations) {
+    bool RelaxELFRelocations,
+    bool CustomUnwindResume) {
 
   auto OptLevel = fromRust(RustOptLevel);
   auto RM = fromRust(RustReloc);
@@ -478,6 +479,11 @@ extern "C" LLVMTargetMachineRef LLVMRustCreateTargetMachine(
   Options.MCOptions.PreserveAsmComments = AsmComments;
   Options.MCOptions.ABIName = ABIStr;
   Options.RelaxELFRelocations = RelaxELFRelocations;
+#ifdef LLVM_RUSTLLVM
+  if (CustomUnwindResume) {
+    Options.EHCustomUnwindResumeFn = "rust_eh_unwind_resume";
+  }
+#endif
 
   if (TrapUnreachable) {
     // Tell LLVM to codegen `unreachable` into an explicit trap instruction.
