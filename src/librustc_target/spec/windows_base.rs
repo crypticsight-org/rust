@@ -46,6 +46,7 @@ pub fn opts() -> TargetOptions {
             // unwinding across DLL boundaries.
             "-lgcc_s".to_string(),
             "-lgcc".to_string(),
+            "-lkernel32".to_string(),
         ],
     );
     late_link_args_static.insert(
@@ -59,6 +60,7 @@ pub fn opts() -> TargetOptions {
             "-lgcc".to_string(),
             "-lgcc_eh".to_string(),
             "-lpthread".to_string(),
+            "-lkernel32".to_string(),
         ],
     );
 
